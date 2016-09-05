@@ -1,5 +1,6 @@
 <?php
 
+use League\Flysystem\AdapterInterface;
 use League\Flysystem\Config;
 use League\Flysystem\Filesystem;
 use League\Flysystem\Util;
@@ -39,11 +40,11 @@ class FilesystemTests extends \PHPUnit_Framework_TestCase
      */
     public function setupAdapter()
     {
-        $this->prophecy = $this->prophesize('League\\Flysystem\\AdapterInterface');
-        $this->adapter = $this->prophecy->reveal();
+        $this->prophecy         = $this->prophesize(AdapterInterface::class);
+        $this->adapter          = $this->prophecy->reveal();
         $this->filesystemConfig = new Config();
-        $this->filesystem = new Filesystem($this->adapter, $this->filesystemConfig);
-        $this->config = Argument::type('League\\Flysystem\\Config');
+        $this->filesystem       = new Filesystem($this->adapter, $this->filesystemConfig);
+        $this->config           = Argument::type(Config::class);
     }
 
     public function testGetAdapter()
@@ -53,7 +54,7 @@ class FilesystemTests extends \PHPUnit_Framework_TestCase
 
     public function testGetConfig()
     {
-        $this->assertInstanceOf('League\\Flysystem\\Config', $this->filesystem->getConfig());
+        $this->assertInstanceOf(Config::class, $this->filesystem->getConfig());
     }
 
     public function testHas()
@@ -64,7 +65,7 @@ class FilesystemTests extends \PHPUnit_Framework_TestCase
 
     public function testWrite()
     {
-        $path = 'path.txt';
+        $path     = 'path.txt';
         $contents = 'contents';
         $this->prophecy->has($path)->willReturn(false);
         $this->prophecy->write($path, $contents, $this->config)->willReturn(compact('path', 'contents'));
@@ -74,7 +75,7 @@ class FilesystemTests extends \PHPUnit_Framework_TestCase
     public function testWriteWithoutAsserts()
     {
         $this->filesystemConfig->set('disable_asserts', true);
-        $path = 'path.txt';
+        $path     = 'path.txt';
         $contents = 'contents';
         $this->prophecy->write($path, $contents, $this->config)->willReturn(compact('path', 'contents'));
         $this->assertTrue($this->filesystem->write($path, $contents));
@@ -82,7 +83,7 @@ class FilesystemTests extends \PHPUnit_Framework_TestCase
 
     public function testWriteStream()
     {
-        $path = 'path.txt';
+        $path   = 'path.txt';
         $stream = tmpfile();
         $this->prophecy->has($path)->willReturn(false);
         $this->prophecy->writeStream($path, $stream, $this->config)->willReturn(compact('path'));
@@ -92,7 +93,7 @@ class FilesystemTests extends \PHPUnit_Framework_TestCase
 
     public function testUpdate()
     {
-        $path = 'path.txt';
+        $path     = 'path.txt';
         $contents = 'contents';
         $this->prophecy->has($path)->willReturn(true);
         $this->prophecy->update($path, $contents, $this->config)->willReturn(compact('path', 'contents'));
@@ -101,7 +102,7 @@ class FilesystemTests extends \PHPUnit_Framework_TestCase
 
     public function testUpdateStream()
     {
-        $path = 'path.txt';
+        $path   = 'path.txt';
         $stream = tmpfile();
         $this->prophecy->has($path)->willReturn(true);
         $this->prophecy->updateStream($path, $stream, $this->config)->willReturn(compact('path'));
@@ -111,7 +112,7 @@ class FilesystemTests extends \PHPUnit_Framework_TestCase
 
     public function testPutNew()
     {
-        $path = 'path.txt';
+        $path     = 'path.txt';
         $contents = 'contents';
         $this->prophecy->has($path)->willReturn(false);
         $this->prophecy->write($path, $contents, $this->config)->willReturn(compact('path', 'contents'));
@@ -120,7 +121,7 @@ class FilesystemTests extends \PHPUnit_Framework_TestCase
 
     public function testPutNewStream()
     {
-        $path = 'path.txt';
+        $path   = 'path.txt';
         $stream = tmpfile();
         $this->prophecy->has($path)->willReturn(false);
         $this->prophecy->writeStream($path, $stream, $this->config)->willReturn(compact('path'));
@@ -130,7 +131,7 @@ class FilesystemTests extends \PHPUnit_Framework_TestCase
 
     public function testPutUpdate()
     {
-        $path = 'path.txt';
+        $path     = 'path.txt';
         $contents = 'contents';
         $this->prophecy->has($path)->willReturn(true);
         $this->prophecy->update($path, $contents, $this->config)->willReturn(compact('path', 'contents'));
@@ -139,7 +140,7 @@ class FilesystemTests extends \PHPUnit_Framework_TestCase
 
     public function testPutUpdateStream()
     {
-        $path = 'path.txt';
+        $path   = 'path.txt';
         $stream = tmpfile();
         $this->prophecy->has($path)->willReturn(true);
         $this->prophecy->updateStream($path, $stream, $this->config)->willReturn(compact('path'));
@@ -167,7 +168,7 @@ class FilesystemTests extends \PHPUnit_Framework_TestCase
 
     public function testReadAndDelete()
     {
-        $path = 'path.txt';
+        $path   = 'path.txt';
         $output = '__CONTENTS__';
         $this->prophecy->has($path)->willReturn(true);
         $this->prophecy->read($path)->willReturn(['contents' => $output]);
@@ -187,7 +188,7 @@ class FilesystemTests extends \PHPUnit_Framework_TestCase
 
     public function testRead()
     {
-        $path = 'path.txt';
+        $path   = 'path.txt';
         $output = '__CONTENTS__';
         $this->prophecy->has($path)->willReturn(true);
         $this->prophecy->read($path)->willReturn(['contents' => $output]);
@@ -197,7 +198,7 @@ class FilesystemTests extends \PHPUnit_Framework_TestCase
 
     public function testReadStream()
     {
-        $path = 'path.txt';
+        $path   = 'path.txt';
         $output = '__CONTENTS__';
         $this->prophecy->has($path)->willReturn(true);
         $this->prophecy->readStream($path)->willReturn(['stream' => $output]);
@@ -272,11 +273,11 @@ class FilesystemTests extends \PHPUnit_Framework_TestCase
             ['getMimetype', 'text/plain'],
             ['getTimestamp', 2345],
             ['getMetadata', [
-                'path' => 'success.txt',
-                'size' => 1234,
+                'path'       => 'success.txt',
+                'size'       => 1234,
                 'visibility' => 'public',
-                'mimetype' => 'text/plain',
-                'timestamp' => 2345,
+                'mimetype'   => 'text/plain',
+                'timestamp'  => 2345,
             ]],
         ];
     }
@@ -289,11 +290,11 @@ class FilesystemTests extends \PHPUnit_Framework_TestCase
         $path = 'success.txt';
         $this->prophecy->has($path)->willReturn(true);
         $this->prophecy->{$method}($path)->willReturn([
-            'path' => $path,
-            'size' => 1234,
+            'path'       => $path,
+            'size'       => 1234,
             'visibility' => 'public',
-            'mimetype' => 'text/plain',
-            'timestamp' => 2345,
+            'mimetype'   => 'text/plain',
+            'timestamp'  => 2345,
         ]);
         $output = $this->filesystem->{$method}($path);
         $this->assertEquals($value, $output);
@@ -372,10 +373,10 @@ class FilesystemTests extends \PHPUnit_Framework_TestCase
     public function testListContents()
     {
         $rawListing = [
-           ['path' => 'other_root/file.txt'],
-           ['path' => 'valid/to_deep/file.txt'],
-           ['path' => 'valid/file.txt'],
-           ['path' => 'valid/a-valid-file.txt'],
+            ['path' => 'other_root/file.txt'],
+            ['path' => 'valid/to_deep/file.txt'],
+            ['path' => 'valid/file.txt'],
+            ['path' => 'valid/a-valid-file.txt'],
         ];
 
         $expected = [
@@ -398,7 +399,7 @@ class FilesystemTests extends \PHPUnit_Framework_TestCase
             // directories
             ['path' => 0, 'type' => 'dir'],
             ['path' => '0', 'type' => 'dir'],
-            ['path' => '', 'type' => 'dir']
+            ['path' => '', 'type' => 'dir'],
         ];
         $this->prophecy->listContents('', false)->willReturn($rawListing);
         $output = $this->filesystem->listContents('', false);
@@ -408,12 +409,12 @@ class FilesystemTests extends \PHPUnit_Framework_TestCase
     public function testListContentsRecursize()
     {
         $rawListing = [
-           ['path' => 'other_root/file.txt'],
-           ['path' => 'valid/to_deep/file.txt'],
-           ['path' => 'valid/file.txt'],
-           ['path' => 'valid/a-valid-file.txt'],
+            ['path' => 'other_root/file.txt'],
+            ['path' => 'valid/to_deep/file.txt'],
+            ['path' => 'valid/file.txt'],
+            ['path' => 'valid/a-valid-file.txt'],
         ];
-        $expected = [
+        $expected   = [
             Util::pathinfo('valid/a-valid-file.txt'),
             Util::pathinfo('valid/file.txt'),
             Util::pathinfo('valid/to_deep/file.txt'),
@@ -432,6 +433,7 @@ class FilesystemTests extends \PHPUnit_Framework_TestCase
         $output = $this->filesystem->listContents('', true);
         $this->assertEquals($expected, $output);
     }
+
     public function testListContentsSubDirectoryMatches()
     {
         $rawListing = [['path' => 'a/dir/file.txt']];
